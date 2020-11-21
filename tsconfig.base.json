@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+      "allowJs": true,
+      "strict": true,
+      "composite": true,
+      "noEmitHelpers": true,
+      "importHelpers": true,
+      "noImplicitAny": false,
+      "moduleResolution": "node",
+      "declaration": true,
+      "declarationMap": true,
+      "experimentalDecorators": true,
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "resolveJsonModule": true,
+      "suppressImplicitAnyIndexErrors": true,
+      "jsx": "react",
+      "baseUrl": "./",
+      "target": "es2015",
+      "typeRoots": ["./packages/**/typings", "./node_modules/@types", "./node_modules/@gem-mine/cli-plugin-typescript/@types"],
+      "paths": {
+        "@gem-mine/*": ["./packages/*/src"]
+      }
+    }
+  }
