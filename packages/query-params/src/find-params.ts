@@ -1,5 +1,5 @@
 /**
- * 根据传入的url，获取指定的query参数
+ * 根据传入的url，获取指定的query参数。
  * @param url {String} url地址
  * @param param  {String} param参数名
  */
