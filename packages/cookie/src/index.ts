@@ -1,15 +1,22 @@
+import assign from './assign'
 import defaultConverter from './converter'
 
-// TODO: 先补充测试用例，后续把代码改为类的形式
-function init (converter, defaultAttributes) {
-  function set (key, value, attributes) {
+export interface converterType {
+  read?: (value:string, key?:string) => string,
+  write?: (value:string, key?:string) => string,
+}
+
+export default class Cookie {
+  // 创建
+  static set (key, value: string, attributes) {
     if (typeof document === 'undefined') {
       return
     }
 
-    attributes = Object.assign({}, defaultAttributes, attributes)
+    attributes = assign({}, { path: '/' }, attributes)
 
     if (typeof attributes.expires === 'number') {
+      // 把过期日期设置为expires天之后
       attributes.expires = new Date(Date.now() + attributes.expires * 864e5)
     }
     if (attributes.expires) {
@@ -17,10 +24,10 @@ function init (converter, defaultAttributes) {
     }
 
     key = encodeURIComponent(key)
-      .replace(/%(2[346B]|5E|60|7C)/g, decodeURIComponent)
-      .replace(/[()]/g, escape)
+        .replace(/%(2[346B]|5E|60|7C)/g, decodeURIComponent)
+        .replace(/[()]/g, escape)
 
-    value = converter.write(value, key)
+    value = defaultConverter.write(value, key)
 
     let stringifiedAttributes = '';
     for (const attributeName in attributes) {
@@ -47,7 +54,8 @@ function init (converter, defaultAttributes) {
     return (document.cookie = key + '=' + value + stringifiedAttributes)
   }
 
-  function get (key) {
+  // 取值
+  static get (key):string | undefined {
     if (typeof document === 'undefined' || (arguments.length && !key)) {
       return
     }
@@ -66,7 +74,7 @@ function init (converter, defaultAttributes) {
 
       try {
         const foundKey = defaultConverter.read(parts[0]);
-        jar[foundKey] = converter.read(value, foundKey)
+        jar[foundKey] = defaultConverter.read(value, foundKey)
 
         if (key === foundKey) {
           break
@@ -77,33 +85,20 @@ function init (converter, defaultAttributes) {
     return key ? jar[key] : jar
   }
 
-  return Object.create(
-    {
-      set: set,
-      get: get,
-      remove: function (key, attributes) {
-        set(
-          key,
-          '',
-          Object.assign({}, attributes, {
-            expires: -1
-          })
-        )
-      },
-      withAttributes: function (attributes) {
-        // @ts-ignore
-        return init(this.converter, Object.assign({}, this.attributes, attributes))
-      },
-      withConverter: function (converter) {
-        // @ts-ignore
-        return init(Object.assign({}, this.converter, converter), this.attributes)
-      }
-    },
-    {
-      attributes: { value: Object.freeze(defaultAttributes) },
-      converter: { value: Object.freeze(converter) }
-    }
-  )
-}
+  // 删除
+  static remove(key, attributes) {
+    this.set(key, '', assign({}, attributes, {expires: -1}))
+  }
 
-export default init(defaultConverter, { path: '/' })
+  // TODO:
+  static withAttributes(attributes: { } = { path: '/' }) {
+    // @ts-ignore
+    return init(this.converter, Object.assign({}, this.attributes, attributes))
+  }
+
+  // TODO:
+  static withConverter(converter: converterType = defaultConverter) {
+    // @ts-ignore
+    return init(Object.assign({}, this.converter, converter), this.attributes)
+  }
+}
